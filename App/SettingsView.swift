@@ -274,7 +274,7 @@ struct PermissionStatusRow: View {
                     .frame(width: 6, height: 6)
                 Text(status ? "Đã liên kết" : "Chưa kết nối")
                     .font(.system(size: 10))
-                    .foregroundColor(status ? .green : .red)
+                    .foregroundColor(status ? Color.green : Color.red)
                     .fontWeight(.bold)
             }
         }

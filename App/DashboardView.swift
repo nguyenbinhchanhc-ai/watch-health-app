@@ -105,7 +105,7 @@ struct DashboardView: View {
     private var dataSourceStatusBadge: some View {
         HStack {
             Image(systemName: healthManager.isMockDataUsed ? "exclamationmark.triangle.fill" : "checkmark.shield.fill")
-                .foregroundColor(healthManager.isMockDataUsed ? .amber : .green)
+                .foregroundColor(healthManager.isMockDataUsed ? Color.amber : Color.green)
             
             Text(healthManager.isMockDataUsed ? "Chế độ mô phỏng (Không có thiết bị thực)" : "Đã đồng bộ từ Apple Watch thực tế")
                 .font(.caption)
@@ -230,7 +230,7 @@ struct DashboardView: View {
                 
                 Text(aiEngine.recoveryScore >= 80 ? "Sẵn sàng" : (aiEngine.recoveryScore >= 50 ? "Trung bình" : "Kiệt sức"))
                     .font(.caption2)
-                    .foregroundColor(aiEngine.recoveryScore >= 80 ? .green : (aiEngine.recoveryScore >= 50 ? .orange : .red))
+                    .foregroundColor(aiEngine.recoveryScore >= 80 ? Color.green : (aiEngine.recoveryScore >= 50 ? Color.orange : Color.red))
                     .fontWeight(.semibold)
             }
             .padding()
@@ -268,7 +268,7 @@ struct DashboardView: View {
                 
                 Text(aiEngine.stressIndex >= 70 ? "Căng thẳng" : (aiEngine.stressIndex >= 40 ? "Bình thường" : "Thư giãn"))
                     .font(.caption2)
-                    .foregroundColor(aiEngine.stressIndex >= 70 ? .red : (aiEngine.stressIndex >= 40 ? .yellow : .green))
+                    .foregroundColor(aiEngine.stressIndex >= 70 ? Color.red : (aiEngine.stressIndex >= 40 ? Color.yellow : Color.green))
                     .fontWeight(.semibold)
             }
             .padding()
@@ -351,7 +351,7 @@ struct DashboardView: View {
                     }
                     .frame(height: 140)
                     .chartXAxis {
-                        AxisMarks(values: .stride(by: .hour, count: 4)) { date in
+                        AxisMarks(values: .stride(by: .hour, count: 4)) {
                             AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
                         }
                     }
@@ -402,7 +402,7 @@ struct DashboardView: View {
                     .frame(height: 140)
                     .chartYScale(domain: 40...160)
                     .chartXAxis {
-                        AxisMarks(values: .stride(by: .hour, count: 6)) { _ in
+                        AxisMarks(values: .stride(by: .hour, count: 6)) {
                             AxisGridLine(stroke: StrokeStyle(dash: [4]))
                                 .foregroundStyle(.white.opacity(0.1))
                             AxisValueLabel(format: .dateTime.hour())
