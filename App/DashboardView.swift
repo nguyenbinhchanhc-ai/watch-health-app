@@ -94,8 +94,8 @@ struct DashboardView: View {
                 Image(systemName: "arrow.clockwise.circle.fill")
                     .resizable()
                     .frame(width: 28, height: 28)
-                    .foregroundColor(.red)
-                    .background(Circle().fill(.white.opacity(0.1)))
+                    .foregroundColor(Color.red)
+                    .background(Circle().fill(Color.white.opacity(0.1)))
             }
         }
         .padding(.vertical, 8)
@@ -131,7 +131,7 @@ struct DashboardView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.05)))
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.05)))
     }
     
     // MARK: - Hazard Board Section
@@ -139,18 +139,18 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: "exclamationmark.octagon.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(Color.red)
                 Text("CẢNH BÁO NGUY HIỂM SỨC KHỎE")
                     .font(.system(.caption, design: .rounded))
                     .fontWeight(.bold)
-                    .foregroundColor(.red)
+                    .foregroundColor(Color.red)
                 Spacer()
                 Text("\(aiEngine.activeHazards.count) Cảnh báo")
                     .font(.caption2)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(Color.white.opacity(0.6))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(.red.opacity(0.2)))
+                    .background(Capsule().fill(Color.red.opacity(0.2)))
             }
             .padding(.horizontal, 4)
             
@@ -178,7 +178,7 @@ struct DashboardView: View {
                         
                         Image(systemName: "chevron.right")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(Color.white.opacity(0.5))
                     }
                     .padding()
                     .background(
@@ -207,11 +207,11 @@ struct DashboardView: View {
             VStack(spacing: 8) {
                 Text("Hồi Phục")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(Color.white.opacity(0.7))
                 
                 ZStack {
                     Circle()
-                        .stroke(.white.opacity(0.1), lineWidth: 6)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 6)
                         .frame(width: 65, height: 65)
                     Circle()
                         .trim(from: 0.0, to: CGFloat(aiEngine.recoveryScore) / 100.0)
@@ -245,11 +245,11 @@ struct DashboardView: View {
             VStack(spacing: 8) {
                 Text("Căng Thẳng")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(Color.white.opacity(0.7))
                 
                 ZStack {
                     Circle()
-                        .stroke(.white.opacity(0.1), lineWidth: 6)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 6)
                         .frame(width: 65, height: 65)
                     Circle()
                         .trim(from: 0.0, to: CGFloat(aiEngine.stressIndex) / 100.0)

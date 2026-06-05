@@ -65,7 +65,7 @@ struct WorkoutHistoryView: View {
             
             Image(systemName: "figure.run.circle.fill")
                 .font(.title)
-                .foregroundColor(.green)
+                .foregroundColor(Color.green)
         }
     }
     
@@ -75,7 +75,7 @@ struct WorkoutHistoryView: View {
             Text("TỔNG HỢP 7 NGÀY QUA")
                 .font(.system(.caption, design: .rounded))
                 .fontWeight(.bold)
-                .foregroundColor(.green)
+                .foregroundColor(Color.green)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             HStack(spacing: 20) {
@@ -182,9 +182,9 @@ struct WorkoutItemRow: View {
     
     private var intensityColor: Color {
         switch intensityLevel {
-        case "Rất cao": return .red
-        case "Trung bình": return .orange
-        default: return .green
+        case "Rất cao": return Color.red
+        case "Trung bình": return Color.orange
+        default: return Color.green
         }
     }
     
@@ -213,9 +213,9 @@ struct WorkoutItemRow: View {
                 HStack(spacing: 10) {
                     Image(systemName: activityIcon)
                         .font(.title3)
-                        .foregroundColor(.green)
+                        .foregroundColor(Color.green)
                         .frame(width: 30, height: 30)
-                        .background(Circle().fill(.green.opacity(0.1)))
+                        .background(Circle().fill(Color.green.opacity(0.1)))
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text(workout.type)

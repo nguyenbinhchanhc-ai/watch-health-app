@@ -120,8 +120,8 @@ struct ExportView: View {
         VStack(spacing: 16) {
             if isPreparing {
                 ProgressView("Đang nén dữ liệu...")
-                    .progressViewStyle(CircularProgressViewStyle(tint: .cyan))
-                    .foregroundColor(.white)
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color.cyan))
+                    .foregroundColor(Color.white)
             } else {
                 // Share JSON Button
                 if let jsonURL = exportJsonURL {
@@ -150,9 +150,9 @@ struct ExportView: View {
                             Image(systemName: "square.and.arrow.up")
                         }
                         .padding()
-                        .background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.08)))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(.white.opacity(0.2), lineWidth: 1))
-                        .foregroundColor(.white)
+                        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white.opacity(0.08)))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.2), lineWidth: 1))
+                        .foregroundColor(Color.white)
                     }
                 }
                 

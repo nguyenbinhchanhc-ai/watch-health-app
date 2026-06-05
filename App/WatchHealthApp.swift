@@ -46,7 +46,7 @@ struct ContentView: View {
                     Label("Cài Đặt", systemImage: "gearshape.fill")
                 }
         }
-        .accentColor(.red) // Custom vibrant red for health apps
+        .accentColor(Color.red) // Custom vibrant red for health apps
         .onAppear {
             // Run initial analysis
             aiEngine.analyze(healthManager: healthManager)

@@ -137,28 +137,28 @@ struct LocalAIReportView: View {
             DiagnosticRow(
                 title: "Thần Kinh Thực Vật (ANS / HRV)",
                 description: aiEngine.recoveryExplanation,
-                color: .green,
+                color: Color.green,
                 icon: "waveform.path.ecg"
             )
             
             DiagnosticRow(
                 title: "Trạng Thái Căng Thẳng (Stress Load)",
                 description: aiEngine.stressExplanation,
-                color: .red,
+                color: Color.red,
                 icon: "brain.head.profile"
             )
             
             DiagnosticRow(
                 title: "Tuần Hoàn & Hô Hấp (Cardio & SpO2)",
                 description: aiEngine.cardioExplanation,
-                color: .blue,
+                color: Color.blue,
                 icon: "lungs.fill"
             )
             
             DiagnosticRow(
                 title: "Cấu Trúc Giấc Ngủ (Sleep Staging)",
                 description: aiEngine.sleepExplanation,
-                color: .purple,
+                color: Color.purple,
                 icon: "bed.double.fill"
             )
         }
@@ -184,10 +184,10 @@ struct LocalAIReportView: View {
                         Text("Copy")
                     }
                     .font(.caption2)
-                    .foregroundColor(.green)
+                    .foregroundColor(Color.green)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(.green.opacity(0.15)))
+                    .background(Capsule().fill(Color.green.opacity(0.15)))
                 }
             }
             
