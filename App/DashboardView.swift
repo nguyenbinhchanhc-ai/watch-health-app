@@ -1,10 +1,12 @@
 import SwiftUI
 import Charts
+import UniformTypeIdentifiers
 
 struct DashboardView: View {
     @EnvironmentObject var healthManager: HealthManager
     @EnvironmentObject var aiEngine: LocalAIEngine
     @State private var selectedHazard: HealthHazard?
+    @State private var showFileImporter = false
     
     // Quick calculations for display
     private var totalSteps: Int {
@@ -37,37 +39,150 @@ struct DashboardView: View {
                 )
                 .ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Header Bar
-                        headerSection
-                        
-                        // Status Badge
-                        dataSourceStatusBadge
-                        
-                        // --- 1. HAZARD BOARD (CẢNH BÁO MỐI NGUY SỨC KHỎE) ---
-                        if !aiEngine.activeHazards.isEmpty {
-                            hazardBoardSection
-                        }
-                        
-                        // --- 2. QUICK SCORES (ĐIỂM SỐ AI CỤC BỘ) ---
-                        quickScoresGrid
-                        
-                        // --- 3. METRIC CARDS ---
-                        metricsGrid
-                        
-                        // --- 4. ANALYTIC CHARTS ---
-                        chartsSection
-                        
-                        Spacer(minLength: 40)
-                    }
-                    .padding()
+                if !healthManager.isXmlDataLoaded {
+                    importEmptyStateView
+                } else {
+                    mainDashboardView
                 }
             }
             .navigationBarHidden(true)
             .sheet(item: $selectedHazard) { hazard in
                 HazardDetailSheet(hazard: hazard)
             }
+            .fileImporter(
+                isPresented: $showFileImporter,
+                allowedContentTypes: [.xml],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    guard let url = urls.first else { return }
+                    Task {
+                        await healthManager.importXML(from: url)
+                        aiEngine.analyze(healthManager: healthManager)
+                    }
+                case .failure(let error):
+                    print("Failed to import file: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Empty State View
+    private var importEmptyStateView: some View {
+        VStack(spacing: 28) {
+            Spacer()
+            
+            // Premium Icon
+            ZStack {
+                Circle()
+                    .fill(Color.red.opacity(0.1))
+                    .frame(width: 100, height: 100)
+                
+                Image(systemName: "doc.badge.arrow.up")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 44, height: 44)
+                    .foregroundColor(Color.red)
+            }
+            
+            VStack(spacing: 10) {
+                Text("Nhập Dữ Liệu Sức Khỏe")
+                    .font(.system(.title2, design: .rounded))
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                Text("SideStore giới hạn kết nối API HealthKit trực tiếp. Bạn có thể xuất dữ liệu từ Apple Health và nhập vào đây.")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+            }
+            
+            // Guide steps
+            VStack(alignment: .leading, spacing: 14) {
+                GuideStepRow(number: "1", text: "Mở ứng dụng Sức khỏe (Health) mặc định trên iPhone.")
+                GuideStepRow(number: "2", text: "Nhấn vào ảnh đại diện góc trên bên phải -> Chọn 'Xuất dữ liệu sức khỏe' (Export All Health Data) để tải về tệp zip.")
+                GuideStepRow(number: "3", text: "Giải nén tệp zip trong ứng dụng Tệp (Files) của iPhone để nhận được thư mục chứa file export.xml.")
+                GuideStepRow(number: "4", text: "Nhấn nút bên dưới để chọn và nhập tệp export.xml vào app.")
+            }
+            .padding()
+            .background(RoundedRectangle(cornerRadius: 16).fill(.white.opacity(0.04)))
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            // Import Trigger Button
+            VStack(spacing: 12) {
+                if healthManager.isParsing {
+                    ProgressView("Đang giải mã và phân tích dữ liệu...")
+                        .progressViewStyle(CircularProgressViewStyle(tint: .red))
+                        .foregroundColor(.white)
+                } else {
+                    Button(action: { showFileImporter = true }) {
+                        HStack {
+                            Image(systemName: "folder.fill.badge.plus")
+                            Text("Chọn Tệp export.xml")
+                                .fontWeight(.bold)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 14).fill(Color.red))
+                    }
+                    .padding(.horizontal)
+                    
+                    if !healthManager.parseError.isEmpty {
+                        Text(healthManager.parseError)
+                            .font(.caption2)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    
+                    Button(action: {
+                        healthManager.forceUseMockData()
+                        aiEngine.analyze(healthManager: healthManager)
+                    }) {
+                        Text("Sử dụng dữ liệu mô phỏng để trải nghiệm")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                            .underline()
+                    }
+                    .padding(.top, 4)
+                }
+            }
+            .padding(.bottom, 30)
+        }
+    }
+    
+    // MARK: - Main Dashboard View
+    private var mainDashboardView: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Header Bar
+                headerSection
+                
+                // Status Badge
+                dataSourceStatusBadge
+                
+                // --- 1. HAZARD BOARD (CẢNH BÁO MỐI NGUY SỨC KHỎE) ---
+                if !aiEngine.activeHazards.isEmpty {
+                    hazardBoardSection
+                }
+                
+                // --- 2. QUICK SCORES (ĐIỂM SỐ AI CỤC BỘ) ---
+                quickScoresGrid
+                
+                // --- 3. METRIC CARDS ---
+                metricsGrid
+                
+                // --- 4. ANALYTIC CHARTS ---
+                chartsSection
+                
+                Spacer(minLength: 40)
+            }
+            .padding()
         }
     }
     
@@ -86,16 +201,15 @@ struct DashboardView: View {
             Spacer()
             
             Button(action: {
-                Task {
-                    await healthManager.refreshData()
-                    aiEngine.analyze(healthManager: healthManager)
-                }
+                showFileImporter = true
             }) {
-                Image(systemName: "arrow.clockwise.circle.fill")
+                Image(systemName: "folder.badge.plus")
                     .resizable()
-                    .frame(width: 28, height: 28)
-                    .foregroundColor(Color.red)
-                    .background(Circle().fill(Color.white.opacity(0.1)))
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .foregroundColor(.red)
+                    .padding(10)
+                    .background(Circle().fill(.white.opacity(0.1)))
             }
         }
         .padding(.vertical, 8)
@@ -104,29 +218,26 @@ struct DashboardView: View {
     // MARK: - Data Source Status Badge
     private var dataSourceStatusBadge: some View {
         HStack {
-            Image(systemName: healthManager.isMockDataUsed ? "exclamationmark.triangle.fill" : "checkmark.shield.fill")
+            Image(systemName: healthManager.isMockDataUsed ? "exclamationmark.triangle.fill" : "doc.text.fill")
                 .foregroundColor(healthManager.isMockDataUsed ? Color.amber : Color.green)
             
-            Text(healthManager.isMockDataUsed ? "Chế độ mô phỏng (Không có thiết bị thực)" : "Đã đồng bộ từ Apple Watch thực tế")
+            Text(healthManager.isMockDataUsed ? "Dữ liệu Mô Phỏng (Đang Trải Nghiệm)" : "File nguồn: \(healthManager.importedXmlFileName)")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.8))
+                .lineLimit(1)
             
             Spacer()
             
-            if healthManager.isMockDataUsed {
-                Button(action: {
-                    Task {
-                        _ = await healthManager.requestAuthorization()
-                    }
-                }) {
-                    Text("Kết nối HealthKit")
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(Color.red))
-                        .foregroundColor(.white)
-                }
+            Button(action: {
+                healthManager.resetData()
+            }) {
+                Text("Xóa dữ liệu")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(.white.opacity(0.12)))
+                    .foregroundColor(.white)
             }
         }
         .padding(.horizontal, 12)
@@ -404,7 +515,7 @@ struct DashboardView: View {
                     .chartXAxis {
                         AxisMarks(values: .stride(by: .hour, count: 6)) {
                             AxisGridLine(stroke: StrokeStyle(dash: [4]))
-                                .foregroundStyle(.white.opacity(0.1))
+                                .foregroundStyle(Color.white.opacity(0.1))
                             AxisValueLabel(format: .dateTime.hour())
                         }
                     }
@@ -424,7 +535,7 @@ struct DashboardView: View {
     private var noDataOverlay: some View {
         HStack {
             Spacer()
-            Text("Không có dữ liệu. Vui lòng bấm làm mới.")
+            Text("Không có dữ liệu. Vui lòng bấm nhập tệp.")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.4))
                 .padding(.vertical, 30)
@@ -433,132 +544,25 @@ struct DashboardView: View {
     }
 }
 
-// MARK: - Metric Card Component
-struct MetricCard: View {
-    let title: String
-    let value: String
-    let unit: String
-    let icon: String
-    let color: Color
-    let trend: String
+// MARK: - Guide Step Row Component
+struct GuideStepRow: View {
+    let number: String
+    let text: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(color)
-                    .font(.title3)
-                Spacer()
-                Text(trend)
-                    .font(.system(size: 10))
-                    .foregroundColor(.white.opacity(0.5))
-            }
+        HStack(alignment: .top, spacing: 12) {
+            Text(number)
+                .font(.system(.caption, design: .rounded))
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .frame(width: 20, height: 20)
+                .background(Circle().fill(Color.red))
+                .padding(.top, 2)
             
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(alignment: .lastTextBaseline, spacing: 2) {
-                    Text(value)
-                        .font(.system(.title3, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    
-                    if !unit.isEmpty {
-                        Text(unit)
-                            .font(.caption2)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                }
-                
-                Text(title)
-                    .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.6))
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.white.opacity(0.05))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(.white.opacity(0.08), lineWidth: 1))
-        )
-    }
-}
-
-// MARK: - Hazard Detail Sheet
-struct HazardDetailSheet: View {
-    let hazard: HealthHazard
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                Color(red: 0.05, green: 0.02, blue: 0.05).ignoresSafeArea()
-                
-                VStack(spacing: 24) {
-                    Image(systemName: hazard.level == .critical ? "exclamationmark.triangle.fill" : "exclamationmark.shield.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 80, height: 80)
-                        .foregroundColor(hazard.level == .critical ? .red : .amber)
-                        .padding(.top, 40)
-                    
-                    VStack(spacing: 8) {
-                        Text(hazard.level.rawValue)
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(hazard.level == .critical ? .red : .amber)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(Capsule().fill((hazard.level == .critical ? Color.red : Color.amber).opacity(0.2)))
-                        
-                        Text(hazard.title)
-                            .font(.system(.title2, design: .rounded))
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text("Phát Hiện Chi Tiết:")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        Text(hazard.description)
-                            .font(.body)
-                            .foregroundColor(.white.opacity(0.8))
-                            .lineSpacing(4)
-                        
-                        Divider().background(.white.opacity(0.1))
-                        
-                        Text("Khuyến Nghị Xử Lý:")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        Text(hazard.recommendation)
-                            .font(.body)
-                            .foregroundColor(.green.opacity(0.9))
-                            .lineSpacing(4)
-                    }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 16).fill(.white.opacity(0.05)))
-                    .padding(.horizontal)
-                    
-                    Spacer()
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Đóng") {
-                        dismiss()
-                    }
-                    .foregroundColor(.red)
-                }
-            }
+            Text(text)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.85))
+                .lineSpacing(3)
         }
     }
-}
-
-// Color asset helpers
-extension Color {
-    static let amber = Color(red: 1.0, green: 0.75, blue: 0.0)
 }

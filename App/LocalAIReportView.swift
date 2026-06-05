@@ -19,30 +19,53 @@ struct LocalAIReportView: View {
                 )
                 .ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Title
-                        headerSection
+                if !healthManager.isXmlDataLoaded {
+                    VStack(spacing: 20) {
+                        Image(systemName: "brain.head.profile")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(Color.gray.opacity(0.3))
+                            .padding()
+                            .background(Circle().fill(.white.opacity(0.04)))
                         
-                        // Main Clinical Score Gauges
-                        scoresDashboardSection
+                        Text("Yêu Cầu Nhập Dữ Liệu Sức Khỏe")
+                            .font(.system(.headline, design: .rounded))
+                            .foregroundColor(.white)
                         
-                        // Diagnostics Summary Cards
-                        diagnosticsBreakdown
-                        
-                        // Markdown Clinical Report View
-                        clinicalReportSection
-                        
-                        // Disclaimer
-                        Text("⚠️ Lưu ý: Phân tích được thực hiện cục bộ bằng AI chuyên gia ngoại tuyến (On-Device AI) và chỉ mang tính chất tham khảo, không có giá trị thay thế chỉ định y tế chính thức.")
-                            .font(.system(size: 10))
-                            .foregroundColor(.white.opacity(0.4))
+                        Text("Vui lòng truy cập màn hình 'Tổng Quan' và chọn tệp export.xml của bạn để chạy chẩn đoán AI.")
+                            .font(.caption)
+                            .foregroundColor(.gray)
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                        
-                        Spacer(minLength: 40)
+                            .padding(.horizontal, 40)
+                            .lineSpacing(3)
                     }
-                    .padding()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            // Title
+                            headerSection
+                            
+                            // Main Clinical Score Gauges
+                            scoresDashboardSection
+                            
+                            // Diagnostics Summary Cards
+                            diagnosticsBreakdown
+                            
+                            // Markdown Clinical Report View
+                            clinicalReportSection
+                            
+                            // Disclaimer
+                            Text("⚠️ Lưu ý: Phân tích được thực hiện cục bộ bằng AI chuyên gia ngoại tuyến (On-Device AI) và chỉ mang tính chất tham khảo, không có giá trị thay thế chỉ định y tế chính thức.")
+                                .font(.system(size: 10))
+                                .foregroundColor(.white.opacity(0.4))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            
+                            Spacer(minLength: 40)
+                        }
+                        .padding()
+                    }
                 }
             }
             .navigationBarHidden(true)
