@@ -1,0 +1,51 @@
+name: Build iOS IPA (Unsigned)
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build IPA
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: |
+          xcodegen generate
+
+      - name: Build Application
+        run: |
+          xcodebuild -project WatchHealth.xcodeproj \
+            -scheme WatchHealth \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            clean build
+
+      - name: Package IPA (Unsigned)
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/WatchHealth.app Payload/
+          zip -vr WatchHealth.ipa Payload/
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WatchHealth-Unsigned-IPA
+          path: WatchHealth.ipa
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,26 @@
+name: WatchHealth
+options:
+  bundleIdPrefix: com.antigravity
+  deploymentTarget:
+    iOS: "16.0"
+
+targets:
+  WatchHealth:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+    entitlements:
+      path: App/WatchHealth.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.background-delivery: true
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.antigravity.watchhealth
+      SWIFT_VERSION: "5.7"
+      INFOPLIST_FILE: App/Info.plist
+      CODE_SIGNING_REQUIRED: "NO"
+      CODE_SIGNING_ALLOWED: "NO"
+      CODE_SIGN_IDENTITY: ""
+      DEVELOPMENT_TEAM: ""
+      PROVISIONING_PROFILE_SPECIFIER: ""
