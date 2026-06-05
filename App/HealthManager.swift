@@ -200,7 +200,7 @@ public class HealthManager: ObservableObject {
         var interval = DateComponents()
         interval.hour = 1
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKStatisticsCollectionQuery(
                 quantityType: stepType,
                 quantitySamplePredicate: predicate,
@@ -238,7 +238,7 @@ public class HealthManager: ObservableObject {
         var interval = DateComponents()
         interval.hour = 1
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKStatisticsCollectionQuery(
                 quantityType: calType,
                 quantitySamplePredicate: predicate,
@@ -275,7 +275,7 @@ public class HealthManager: ObservableObject {
         let predicate = HKQuery.predicateForSamples(withStart: yesterday, end: now, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: hrType,
                 predicate: predicate,
@@ -308,7 +308,7 @@ public class HealthManager: ObservableObject {
         let predicate = HKQuery.predicateForSamples(withStart: sevenDaysAgo, end: now, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: hrvType,
                 predicate: predicate,
@@ -341,7 +341,7 @@ public class HealthManager: ObservableObject {
         let predicate = HKQuery.predicateForSamples(withStart: sevenDaysAgo, end: now, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: rhrType,
                 predicate: predicate,
@@ -374,7 +374,7 @@ public class HealthManager: ObservableObject {
         let predicate = HKQuery.predicateForSamples(withStart: sevenDaysAgo, end: now, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: spo2Type,
                 predicate: predicate,
@@ -407,7 +407,7 @@ public class HealthManager: ObservableObject {
         let predicate = HKQuery.predicateForSamples(withStart: sevenDaysAgo, end: now, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: noiseType,
                 predicate: predicate,
@@ -420,7 +420,7 @@ public class HealthManager: ObservableObject {
                 }
                 
                 let data = quantitySamples.map { sample in
-                    let db = sample.quantity.doubleValue(for: HKUnit.decibelAWeightedHearingLevel())
+                    let db = sample.quantity.doubleValue(for: HKUnit.decibelAWeightedSoundPressureLevel())
                     return NoiseData(date: sample.startDate, value: db)
                 }
                 continuation.resume(returning: data)
@@ -440,7 +440,7 @@ public class HealthManager: ObservableObject {
         let predicate = HKQuery.predicateForSamples(withStart: sevenDaysAgo, end: now, options: .strictStartDate)
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: sleepType,
                 predicate: predicate,
@@ -492,9 +492,9 @@ public class HealthManager: ObservableObject {
         let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: now)!
         
         let predicate = HKQuery.predicateForSamples(withStart: sevenDaysAgo, end: now, options: .strictStartDate)
-        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, descending: false)
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
         
-        return await Swift.withCheckedContinuation { continuation in
+        return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: HKWorkoutType.workoutType(),
                 predicate: predicate,
