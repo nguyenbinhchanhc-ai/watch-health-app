@@ -566,3 +566,133 @@ struct GuideStepRow: View {
         }
     }
 }
+
+// MARK: - Metric Card Component
+struct MetricCard: View {
+    let title: String
+    let value: String
+    let unit: String
+    let icon: String
+    let color: Color
+    let trend: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: icon)
+                    .foregroundColor(color)
+                    .font(.title3)
+                Spacer()
+                Text(trend)
+                    .font(.system(size: 10))
+                    .foregroundColor(Color.white.opacity(0.5))
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .lastTextBaseline, spacing: 2) {
+                    Text(value)
+                        .font(.system(.title3, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                    
+                    if !unit.isEmpty {
+                        Text(unit)
+                            .font(.caption2)
+                            .foregroundColor(Color.white.opacity(0.6))
+                    }
+                }
+                
+                Text(title)
+                    .font(.system(size: 11))
+                    .foregroundColor(Color.white.opacity(0.6))
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.05))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        )
+    }
+}
+
+// MARK: - Hazard Detail Sheet
+struct HazardDetailSheet: View {
+    let hazard: HealthHazard
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color(red: 0.05, green: 0.02, blue: 0.05).ignoresSafeArea()
+                
+                VStack(spacing: 24) {
+                    Image(systemName: hazard.level == .critical ? "exclamationmark.triangle.fill" : "exclamationmark.shield.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
+                        .foregroundColor(hazard.level == .critical ? Color.red : Color.amber)
+                        .padding(.top, 40)
+                    
+                    VStack(spacing: 8) {
+                        Text(hazard.level.rawValue)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(hazard.level == .critical ? Color.red : Color.amber)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill((hazard.level == .critical ? Color.red : Color.amber).opacity(0.2)))
+                        
+                        Text(hazard.title)
+                            .font(.system(.title2, design: .rounded))
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Phát Hiện Chi Tiết:")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        
+                        Text(hazard.description)
+                            .font(.body)
+                            .foregroundColor(Color.white.opacity(0.8))
+                            .lineSpacing(4)
+                        
+                        Divider().background(Color.white.opacity(0.1))
+                        
+                        Text("Khuyến Nghị Xử Lý:")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        
+                        Text(hazard.recommendation)
+                            .font(.body)
+                            .foregroundColor(Color.green.opacity(0.9))
+                            .lineSpacing(4)
+                    }
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.05)))
+                    .padding(.horizontal)
+                    
+                    Spacer()
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Đóng") {
+                        dismiss()
+                    }
+                    .foregroundColor(Color.red)
+                }
+            }
+        }
+    }
+}
+
+// Color asset helpers
+extension Color {
+    static let amber = Color(red: 1.0, green: 0.75, blue: 0.0)
+}

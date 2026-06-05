@@ -71,40 +71,39 @@ struct SettingsView: View {
     // MARK: - HealthKit Status Checklist
     private var healthKitConnectionSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("QUYỀN TRUY CẬP APPLE HEALTH")
+            Text("TRẠNG THÁI DỮ LIỆU NHẬP (XML)")
                 .font(.system(.caption, design: .rounded))
                 .fontWeight(.bold)
                 .foregroundColor(.red)
             
             VStack(spacing: 12) {
-                PermissionStatusRow(title: "Quyền đọc số bước chân (Steps)", status: healthManager.isAuthorized)
-                PermissionStatusRow(title: "Quyền đọc nhịp tim (HR / RHR / HRV)", status: healthManager.isAuthorized)
-                PermissionStatusRow(title: "Quyền đọc nồng độ oxy (SpO2)", status: healthManager.isAuthorized)
-                PermissionStatusRow(title: "Quyền đọc cấu trúc giấc ngủ (Sleep)", status: healthManager.isAuthorized)
-                PermissionStatusRow(title: "Quyền đọc âm thanh môi trường", status: healthManager.isAuthorized)
-                PermissionStatusRow(title: "Quyền đọc hoạt động thể chất (Workouts)", status: healthManager.isAuthorized)
+                PermissionStatusRow(title: "Nhập tệp export.xml từ Apple Health", status: healthManager.isXmlDataLoaded)
+                if healthManager.isXmlDataLoaded {
+                    PermissionStatusRow(title: "Dữ liệu bước chân đã đồng bộ", status: !healthManager.stepsToday.isEmpty)
+                    PermissionStatusRow(title: "Dữ liệu nhịp tim đã đồng bộ", status: !healthManager.heartRateRecords.isEmpty)
+                    PermissionStatusRow(title: "Dữ liệu giấc ngủ đã đồng bộ", status: !healthManager.sleepRecords.isEmpty)
+                }
             }
             
             Button(action: {
-                Task {
-                    _ = await healthManager.requestAuthorization()
-                    aiEngine.analyze(healthManager: healthManager)
-                }
+                healthManager.resetData()
+                aiEngine.analyze(healthManager: healthManager)
             }) {
-                Text("Yêu cầu kết nối Apple Health")
+                Text(healthManager.isXmlDataLoaded ? "Xóa Dữ Liệu XML Đã Nhập" : "Chưa Nhập Dữ Liệu Thực Tế")
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color.red))
+                    .background(RoundedRectangle(cornerRadius: 12).fill(healthManager.isXmlDataLoaded ? Color.red : Color.gray))
             }
+            .disabled(!healthManager.isXmlDataLoaded)
             .padding(.top, 4)
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(.white.opacity(0.04))
-                .overlay(RoundedRectangle(cornerRadius: 20).stroke(.white.opacity(0.08), lineWidth: 1))
+                .fill(Color.white.opacity(0.04))
+                .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.08), lineWidth: 1))
         )
     }
     
@@ -205,19 +204,17 @@ struct SettingsView: View {
                 }
                 
                 Button(action: {
-                    Task {
-                        await healthManager.refreshData()
-                        aiEngine.analyze(healthManager: healthManager)
-                    }
+                    healthManager.resetData()
+                    aiEngine.analyze(healthManager: healthManager)
                 }) {
-                    Text("Tải Dữ Liệu Thực")
+                    Text("Xóa Dữ Liệu Mô Phỏng")
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.08)))
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(.white.opacity(0.12), lineWidth: 1))
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.12), lineWidth: 1))
                 }
             }
         }

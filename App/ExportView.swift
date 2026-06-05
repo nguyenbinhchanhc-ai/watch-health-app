@@ -175,6 +175,23 @@ struct ExportView: View {
             return
         }
         
+        // Capture MainActor-isolated variables before dispatching to background thread
+        let steps = healthManager.stepsToday
+        let calories = healthManager.caloriesToday
+        let heartRates = healthManager.heartRateRecords
+        let hrvs = healthManager.hrvRecords
+        let rhrs = healthManager.rhrRecords
+        let spo2s = healthManager.spo2Records
+        let sleep = healthManager.sleepRecords
+        let noise = healthManager.noiseRecords
+        let workouts = healthManager.recentWorkouts
+        
+        let recoveryScore = aiEngine.recoveryScore
+        let stressIndex = aiEngine.stressIndex
+        let cardiovascularScore = aiEngine.cardiovascularScore
+        let sleepQualityScore = aiEngine.sleepQualityScore
+        let localAiReportMarkdown = aiEngine.localAiReportMarkdown
+        
         isPreparing = true
         
         // Run in background thread
@@ -186,20 +203,20 @@ struct ExportView: View {
             // 1. JSON Packaging
             let package = ExportDataPackage(
                 exportDate: dateStr,
-                stepsToday: healthManager.stepsToday,
-                caloriesToday: healthManager.caloriesToday,
-                heartRateRecords: healthManager.heartRateRecords,
-                hrvRecords: healthManager.hrvRecords,
-                rhrRecords: healthManager.rhrRecords,
-                spo2Records: healthManager.spo2Records,
-                sleepRecords: healthManager.sleepRecords,
-                noiseRecords: healthManager.noiseRecords,
-                recentWorkouts: healthManager.recentWorkouts,
-                aiScoreRecovery: aiEngine.recoveryScore,
-                aiScoreStress: aiEngine.stressIndex,
-                aiScoreCardio: aiEngine.cardiovascularScore,
-                aiScoreSleep: aiEngine.sleepQualityScore,
-                aiReportMarkdown: aiEngine.localAiReportMarkdown
+                stepsToday: steps,
+                caloriesToday: calories,
+                heartRateRecords: heartRates,
+                hrvRecords: hrvs,
+                rhrRecords: rhrs,
+                spo2Records: spo2s,
+                sleepRecords: sleep,
+                noiseRecords: noise,
+                recentWorkouts: workouts,
+                aiScoreRecovery: recoveryScore,
+                aiScoreStress: stressIndex,
+                aiScoreCardio: cardiovascularScore,
+                aiScoreSleep: sleepQualityScore,
+                aiReportMarkdown: localAiReportMarkdown
             )
             
             let tempDir = FileManager.default.temporaryDirectory
@@ -229,18 +246,18 @@ struct ExportView: View {
             
             for hour in 0..<24 {
                 if let hourDate = calendar.date(byAdding: .hour, value: hour, to: startOfToday) {
-                    let steps = healthManager.stepsToday.first(where: { calendar.component(.hour, from: $0.date) == hour })?.count ?? 0
-                    let cals = healthManager.caloriesToday.first(where: { calendar.component(.hour, from: $0.date) == hour })?.calories ?? 0
-                    let hr = healthManager.heartRateRecords.filter { calendar.component(.hour, from: $0.date) == hour }.map { $0.value }.first ?? 0
-                    let hrv = healthManager.hrvRecords.filter { calendar.component(.hour, from: $0.date) == hour }.map { $0.value }.first ?? 0
-                    let rhr = healthManager.rhrRecords.first?.value ?? 0
-                    let spo2 = (healthManager.spo2Records.filter { calendar.component(.hour, from: $0.date) == hour }.map { $0.value }.first ?? 0) * 100
+                    let stepsCount = steps.first(where: { calendar.component(.hour, from: $0.date) == hour })?.count ?? 0
+                    let calsCount = calories.first(where: { calendar.component(.hour, from: $0.date) == hour })?.calories ?? 0
+                    let hr = heartRates.filter { calendar.component(.hour, from: $0.date) == hour }.map { $0.value }.first ?? 0
+                    let hrv = hrvs.filter { calendar.component(.hour, from: $0.date) == hour }.map { $0.value }.first ?? 0
+                    let rhrVal = rhrs.first?.value ?? 0
+                    let spo2 = (spo2s.filter { calendar.component(.hour, from: $0.date) == hour }.map { $0.value }.first ?? 0) * 100
                     
                     let timeFormatter = DateFormatter()
                     timeFormatter.dateFormat = "HH:00"
                     let timeLabel = timeFormatter.string(from: hourDate)
                     
-                    let row = "\(timeLabel),\(steps),\(cals),\(hr > 0 ? "\(hr)" : ""),\(hrv > 0 ? "\(hrv)" : ""),\(rhr > 0 ? "\(rhr)" : ""),\(spo2 > 0 ? "\(spo2)" : "")\n"
+                    let row = "\(timeLabel),\(stepsCount),\(calsCount),\(hr > 0 ? "\(hr)" : ""),\(hrv > 0 ? "\(hrv)" : ""),\(rhrVal > 0 ? "\(rhrVal)" : ""),\(spo2 > 0 ? "\(spo2)" : "")\n"
                     csvString.append(row)
                 }
             }
